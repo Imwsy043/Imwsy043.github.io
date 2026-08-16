@@ -1,0 +1,1 @@
+import{j as r}from"./jsx-runtime.D_zvdyIk.js";import{F as e}from"./index.CmK2ybRh.js";import{g as s}from"./index.BULSjl3U.js";import"./index.BR1w_nJd.js";import"./_commonjsHelpers.D6-XlEtG.js";function l({href:o,className:t}){return r.jsx("a",{href:o,target:"_blank","aria-label":"RSS",rel:"noreferrer",className:t,children:r.jsx(e,{icon:s,scale:20})})}export{l as default};

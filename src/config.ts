@@ -39,10 +39,9 @@ export default {
     enable: true,
     interval: 6000,
     images: [
-      "/images/home/akimio-banner-01.jpg",
-      "/images/home/akimio-banner-02.jpg",
-      "/images/home/akimio-banner-03.png",
-      "/images/home/akimio-banner-04.png",
+      "/images/home/banner-station.jpg",
+      "/images/home/banner-seaside.jpg",
+      "/images/home/banner-blue-night.png",
     ],
   },
 

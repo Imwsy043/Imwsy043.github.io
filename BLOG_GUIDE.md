@@ -141,13 +141,12 @@ cover: "/images/summer-night.jpg"
 
 ## 6. 修改首页轮播横幅
 
-四张轮播图位于：
+三张轮播图位于：
 
 ```text
-public\images\home\akimio-banner-01.jpg
-public\images\home\akimio-banner-02.jpg
-public\images\home\akimio-banner-03.png
-public\images\home\akimio-banner-04.png
+public\images\home\banner-station.jpg
+public\images\home\banner-seaside.jpg
+public\images\home\banner-blue-night.png
 ```
 
 最简单的换图方法：用新图片覆盖对应文件，文件名和扩展名保持不变。
@@ -165,10 +164,9 @@ home_banner_slideshow: {
   enable: true,
   interval: 6000,
   images: [
-    "/images/home/akimio-banner-01.jpg",
-    "/images/home/akimio-banner-02.jpg",
-    "/images/home/akimio-banner-03.png",
-    "/images/home/akimio-banner-04.png",
+      "/images/home/banner-station.jpg",
+      "/images/home/banner-seaside.jpg",
+      "/images/home/banner-blue-night.png",
   ],
 },
 ```

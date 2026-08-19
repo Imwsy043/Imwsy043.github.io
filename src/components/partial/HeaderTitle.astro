@@ -1,0 +1,134 @@
+---
+type Props = {
+  title: string;
+  url: string;
+  typing?: boolean;
+};
+
+const { title, url, typing = false } = Astro.props;
+---
+
+<div>
+  <a href={url} id="logo">
+    <h1
+      class:list={{ "typing-title": typing }}
+      data-aos={typing ? undefined : "slide-up"}
+      data-typing-text={typing ? title : undefined}
+      aria-label={title}
+    >{title}</h1>
+  </a>
+</div>
+
+<script is:inline data-astro-rerun>
+  (() => {
+    const element = document.querySelector('[data-typing-text]');
+    if (!element) return;
+
+    const text = element.dataset.typingText || '';
+    window.clearTimeout(window.__akimioTypingStartTimer);
+    window.clearTimeout(window.__akimioTypingTimer);
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      element.textContent = text;
+      element.dataset.typingDone = 'true';
+      return;
+    }
+
+    element.textContent = '';
+    element.classList.add('typing-active');
+    element.dataset.typingStarted = 'true';
+    delete element.dataset.typingDone;
+
+    const characters = Array.from(text);
+    let index = 0;
+
+    const typeNext = () => {
+      if (!element.isConnected) return;
+      if (index >= characters.length) {
+        element.classList.remove('typing-active');
+        element.dataset.typingDone = 'true';
+        return;
+      }
+      element.textContent += characters[index];
+      index += 1;
+      window.__akimioTypingTimer = window.setTimeout(
+        typeNext,
+        index === 1 ? 220 : 72
+      );
+    };
+
+    let startScheduled = false;
+    const scheduleTyping = () => {
+      if (startScheduled || !element.isConnected) return;
+      startScheduled = true;
+      window.__akimioTypingStartTimer = window.setTimeout(typeNext, 850);
+    };
+
+    document.addEventListener('astro:page-load', scheduleTyping, { once: true });
+    if (document.readyState !== 'loading') scheduleTyping();
+  })();
+</script>
+
+<style lang="stylus">
+  #logo {
+    text-decoration: none;
+  }
+
+  h1 {
+    text-decoration: none;
+    color: var(--color-header-title);
+    font-size: 40px;
+    font-weight: 700;
+    letter-spacing: 0;
+    display: inline-block;
+    transform: translateY(-20%);
+    text-shadow: 0 2px 14px var(--color-header-title-shadow);
+
+
+    @media screen and (max-width: 959px) {
+      font-size: 36px;
+    }
+
+    @media screen and (min-width: 480px) and (max-width: 767px) {
+      font-size: 30px;
+    }
+
+    @media screen and (max-width: 479px) { 
+      font-size: 30px;
+    }
+  }
+
+  .typing-title {
+    display: block;
+    width: min(90vw, 760px);
+    min-height: 1.25em;
+    margin: 0 auto;
+    text-align: center;
+    line-height: 1.25;
+    overflow-wrap: normal;
+
+    &.typing-active::after {
+      content: "";
+      display: inline-block;
+      width: 2px;
+      height: 0.9em;
+      margin-left: 6px;
+      background: currentColor;
+      vertical-align: -0.08em;
+      animation: typing-caret 0.8s steps(1, end) infinite;
+    }
+
+    @media screen and (max-width: 479px) {
+      min-height: 2.5em;
+    }
+  }
+
+  @keyframes typing-caret {
+    0%, 48% {
+      opacity: 1;
+    }
+    49%, 100% {
+      opacity: 0;
+    }
+  }
+</style>

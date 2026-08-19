@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">Temporary image placeholder</title>
+  <desc id="desc">A quiet coral and white geometric placeholder for future blog artwork.</desc>
+  <rect width="1600" height="900" fill="#fff3f3"/>
+  <path d="M0 660 420 260l280 220 260-330 640 610v140H0Z" fill="#ffd0d0"/>
+  <path d="M0 730 360 430l220 170 300-300 720 500v100H0Z" fill="#ffafaf" opacity=".72"/>
+  <circle cx="1240" cy="210" r="116" fill="#ff7c7c" opacity=".7"/>
+  <circle cx="1240" cy="210" r="54" fill="#fff3f3"/>
+  <path d="M112 160h360M112 208h210M112 256h290" fill="none" stroke="#ff5252" stroke-linecap="round" stroke-width="18" opacity=".55"/>
+</svg>

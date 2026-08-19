@@ -1,0 +1,217 @@
+.music-player
+  position: fixed
+  right: 24px
+  bottom: 24px
+  width: 64px
+  height: 64px
+  z-index: 950
+
+.music-player-button
+  appearance: none
+  position: relative
+  z-index: 2
+  width: 64px
+  height: 64px
+  display: grid
+  place-items: center
+  overflow: hidden
+  padding: 0
+  border: 1px solid var(--color-border)
+  border-radius: 50%
+  background: rgba(255, 255, 255, 0.92)
+  box-shadow: 0 4px 16px rgba(28, 43, 61, 0.2)
+  cursor: pointer
+  transition: transform 0.2s, box-shadow 0.2s, background 0.3s
+
+  &:hover
+    transform: translateY(-2px) scale(1.04)
+    box-shadow: 0 6px 20px rgba(28, 43, 61, 0.28)
+
+  &:focus-visible
+    outline: 2px solid var(--red-1)
+    outline-offset: 3px
+
+.music-player-art
+  width: 84%
+  height: 84%
+  object-fit: contain
+  pointer-events: none
+
+.music-player-control
+  position: absolute
+  right: 3px
+  bottom: 3px
+  width: 22px
+  height: 22px
+  display: grid
+  place-items: center
+  box-sizing: border-box
+  border: 1px solid var(--color-border)
+  border-radius: 50%
+  background: var(--color-wrap)
+  color: var(--red-0)
+  font-size: 9px
+
+  svg
+    width: 9px
+    height: 9px
+
+  .is-loading
+    animation: music-player-spin 0.8s linear infinite
+
+.music-player.is-playing .music-player-art
+  animation: music-cat-spin 8s linear infinite
+
+.music-player-actions
+  position: absolute
+  right: 0
+  bottom: 72px
+  width: 214px
+  box-sizing: border-box
+  padding: 8px
+  border: 1px solid var(--color-border)
+  border-radius: 8px
+  background: var(--color-wrap)
+  box-shadow: var(--shadow-card)
+  opacity: 0
+  transform: translateY(8px) scale(0.98)
+  transform-origin: bottom right
+  pointer-events: none
+  transition: opacity 0.18s ease, transform 0.18s ease
+
+  &::after
+    content: ""
+    position: absolute
+    right: 0
+    bottom: -14px
+    width: 80px
+    height: 16px
+
+.music-player:hover .music-player-actions,
+.music-player:focus-within .music-player-actions
+  opacity: 1
+  transform: translateY(0) scale(1)
+  pointer-events: auto
+
+.music-player-track
+  position: relative
+  display: block
+  min-height: 48px
+  padding: 5px 30px 5px 8px
+  border-radius: 6px
+  color: var(--color-default)
+  text-decoration: none
+
+  &:hover
+    background: var(--color-background)
+
+  strong,
+  span
+    display: block
+    overflow: hidden
+    text-overflow: ellipsis
+    white-space: nowrap
+
+  strong
+    color: var(--color-link)
+    font-size: 13px
+    font-weight: 700
+
+  span
+    margin-top: 2px
+    font-size: 11px
+
+  small
+    position: absolute
+    top: 8px
+    right: 8px
+    color: var(--color-default)
+    font-size: 10px
+
+.music-player-message
+  margin: 0 8px 4px
+  padding: 5px 7px
+  border-radius: 6px
+  background: var(--color-background)
+  color: var(--color-default)
+  font-size: 11px
+  line-height: 1.45
+
+  &.is-error
+    color: var(--red-0)
+
+.music-player-action
+  appearance: none
+  width: 100%
+  min-height: 34px
+  display: flex
+  align-items: center
+  gap: 9px
+  padding: 6px 8px
+  border: 0
+  border-radius: 6px
+  box-sizing: border-box
+  background: transparent
+  color: var(--color-default)
+  font: inherit
+  font-size: 12px
+  text-align: left
+  text-decoration: none
+  cursor: pointer
+
+  svg
+    width: 14px
+    min-width: 14px
+    color: var(--color-link)
+
+  &:hover,
+  &:focus-visible
+    background: var(--color-background)
+    color: var(--color-link)
+
+  &.is-liked
+    color: var(--color-link)
+
+.music-player-status
+  position: absolute
+  width: 1px
+  height: 1px
+  overflow: hidden
+  clip: rect(0 0 0 0)
+  clip-path: inset(50%)
+  white-space: nowrap
+
+[data-theme='dark']
+  .music-player-button
+    background: rgba(27, 37, 50, 0.94)
+
+  .music-player-art
+    filter: invert(1) brightness(1.1) !important
+
+@keyframes music-cat-spin
+  from
+    transform: rotate(0)
+  to
+    transform: rotate(360deg)
+
+@keyframes music-player-spin
+  to
+    transform: rotate(360deg)
+
+@media (prefers-reduced-motion: reduce)
+  .music-player.is-playing .music-player-art
+    animation: none
+
+@media screen and (max-width: 767px)
+  .music-player
+    right: 16px
+    bottom: 18px
+    width: 56px
+    height: 56px
+
+  .music-player-button
+    width: 56px
+    height: 56px
+
+  .music-player-actions
+    bottom: 64px

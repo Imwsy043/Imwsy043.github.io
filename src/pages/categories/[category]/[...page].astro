@@ -1,0 +1,117 @@
+---
+import { getCollection, type CollectionEntry } from "astro:content";
+
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { __ } from "../../../utils/i18n";
+import Footer from "../../../components/Footer.astro";
+import CategoryList from "../../../components/partial/CategoryList.astro";
+import HeaderTitle from "../../../components/partial/HeaderTitle.astro";
+import ArchiveList from "../../../components/ArchiveList.astro";
+import Pagination from "../../../components/Pagination.astro";
+import { HOME_CATEGORIES } from "../../../utils/config";
+import { urlFor } from "../../../utils/urlFor";
+
+export async function getStaticPaths({ paginate }: { paginate: Function }) {
+  const posts = await getCollection("blog");
+  const configuredCategories = HOME_CATEGORIES.content
+    .map((item) => item.categories)
+    .filter(Boolean);
+  const categoriesMap: Map<string, CollectionEntry<"blog">[]> = new Map(
+    configuredCategories.map((category) => [category, []])
+  );
+  posts.forEach((post) => {
+    if (Array.isArray(post.data.categories)) {
+      post.data.categories.forEach((category) => {
+        if (categoriesMap.has(category)) {
+          categoriesMap.get(category)!.push(post);
+        } else {
+          categoriesMap.set(category, [post]);
+        }
+      });
+    }
+  });
+  const categories = [...categoriesMap.keys()];
+  return [...categoriesMap.entries()]
+    .map(([category, categoryPosts]) => {
+      categoryPosts.sort((a, b) => {
+        return b.data.pubDate.getTime() - a.data.pubDate.getTime();
+      });
+      return [category, categoryPosts] as const;
+    })
+    .flatMap(([category, categoryPosts]) => {
+      if (categoryPosts.length === 0) {
+        return [{
+          params: { category },
+          props: {
+            categories,
+            page: {
+              data: [],
+              url: { prev: null, next: null },
+              currentPage: 1,
+              lastPage: 1,
+            },
+          },
+        }];
+      }
+
+      return paginate(categoryPosts, {
+        params: { category },
+        props: { categories },
+        pageSize: 5,
+      });
+    });
+}
+
+type Props = {
+  page: {
+    data: CollectionEntry<"blog">[];
+    url: {
+      prev: string | null;
+      next: string | null;
+    };
+    currentPage: number;
+    lastPage: number;
+  };
+  categories: string[];
+};
+
+const { page, categories } = Astro.props;
+const { category } = Astro.params;
+---
+
+<BaseLayout title={`${__("category")}: ${category}`}>
+  <!-- Header -->
+  <HeaderTitle
+    title={`${__("category")}: ${category}`}
+    url={urlFor(`categories/${category}`)}
+    slot="header"
+  />
+  <!-- Content -->
+  <section id="main" aria-label="Main content">
+    <div class="archives-outer-wrap" data-aos="fade-up">
+      <CategoryList categories={[...categories]} />
+      <ArchiveList page={page} type="archives" />
+    </div>
+    {
+      page.lastPage > 1 && (
+        <Pagination
+          prevUrl={page.url.prev}
+          nextUrl={page.url.next}
+          currentPage={page.currentPage}
+          lastPage={page.lastPage}
+          url={`/categories/${encodeURIComponent(category || "")}`}
+        />
+      )
+    }
+  </section>
+  <!-- Footer -->
+  <Footer slot="footer" />
+</BaseLayout>
+
+<style>
+  .archives-outer-wrap {
+    background: var(--color-wrap);
+    border-radius: 12px;
+    padding: 16px 0;
+  }
+</style>

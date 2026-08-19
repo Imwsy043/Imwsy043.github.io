@@ -1,0 +1,406 @@
+---
+import { BANNER, BANNER_SRCSET } from "../../utils/config";
+import { urlFor } from "../../utils/urlFor";
+
+type Props = {
+  cover?: string;
+  slides?: string[];
+  interval?: number;
+};
+
+const {
+  cover,
+  slides = [],
+  interval = 6000,
+} = Astro.props;
+const slideshowEnabled = !cover && slides.length > 0;
+---
+
+<div
+  class:list={["header-backdrop", { "is-slideshow": slideshowEnabled }]}
+  data-header-slideshow={slideshowEnabled ? "true" : undefined}
+  data-slide-interval={slideshowEnabled ? interval : undefined}
+  aria-hidden="true"
+>
+  {
+    cover ? (
+      <img src={urlFor(cover)} alt="" fetchpriority="high" />
+    ) : slideshowEnabled ? (
+      <div class="header-slide-stack">
+        {slides.map((slide, index) => (
+          <div
+            class:list={["header-slide", { "is-active": index === 0 }]}
+            data-header-slide
+          >
+            <img
+              class="header-slide-ambient"
+              src={urlFor(slide)}
+              alt=""
+              loading={index === 0 ? "eager" : "lazy"}
+              decoding="async"
+              fetchpriority={index === 0 ? "high" : "low"}
+            />
+            <img
+              class="header-slide-image"
+              src={urlFor(slide)}
+              alt=""
+              loading={index === 0 ? "eager" : "lazy"}
+              decoding="async"
+              fetchpriority={index === 0 ? "high" : "low"}
+            />
+          </div>
+        ))}
+      </div>
+    ) : BANNER_SRCSET.enable ? (
+      <picture>
+        {BANNER_SRCSET.srcset.map((source) => (
+          <source media={source.media} srcset={urlFor(source.src)} />
+        ))}
+        <img src={urlFor(BANNER)} alt="" fetchpriority="high" />
+      </picture>
+    ) : (
+      <img src={urlFor(BANNER)} alt="" fetchpriority="high" />
+    )
+  }
+  {
+    slideshowEnabled && (
+      <>
+        <div class="header-clarity" />
+        <div class="header-meteors">
+          <i class="header-meteor meteor-one" />
+          <i class="header-meteor meteor-two" />
+          <i class="header-meteor meteor-three" />
+        </div>
+        <div class="header-waves">
+          <svg
+            viewBox="0 20 150 32"
+            preserveAspectRatio="none"
+            shape-rendering="auto"
+          >
+            <defs>
+              <path
+                id="akimio-gentle-wave"
+                d="M-160 44c30 0 58-18 88-18s58 18 88 18 58-18 88-18 58 18 88 18v48h-352z"
+              />
+            </defs>
+            <g class="wave-parallax">
+              <use href="#akimio-gentle-wave" x="48" y="0" class="wave-one" />
+              <use href="#akimio-gentle-wave" x="48" y="3" class="wave-two" />
+              <use href="#akimio-gentle-wave" x="48" y="5" class="wave-three" />
+              <use href="#akimio-gentle-wave" x="48" y="7" class="wave-four" />
+            </g>
+          </svg>
+        </div>
+      </>
+    )
+  }
+</div>
+
+<script>
+  const initHeaderBackdrop = () => {
+    document
+      .querySelectorAll<HTMLElement>("[data-header-slideshow]")
+      .forEach((backdrop) => {
+        if (backdrop.dataset.motionReady === "true") return;
+        backdrop.dataset.motionReady = "true";
+
+        const slides = Array.from(
+          backdrop.querySelectorAll<HTMLElement>("[data-header-slide]")
+        );
+        const reducedMotion = window.matchMedia(
+          "(prefers-reduced-motion: reduce)"
+        ).matches;
+        let currentSlide = 0;
+        let slideTimer = 0;
+
+        if (!reducedMotion && slides.length > 1) {
+          const configuredInterval = Number(backdrop.dataset.slideInterval);
+          const slideInterval = Number.isFinite(configuredInterval)
+            ? Math.max(configuredInterval, 3000)
+            : 6000;
+          slideTimer = window.setInterval(() => {
+            slides[currentSlide]?.classList.remove("is-active");
+            currentSlide = (currentSlide + 1) % slides.length;
+            slides[currentSlide]?.classList.add("is-active");
+          }, slideInterval);
+        }
+
+        document.addEventListener(
+          "astro:before-swap",
+          () => {
+            window.clearInterval(slideTimer);
+          },
+          { once: true }
+        );
+      });
+  };
+
+  document.addEventListener("astro:page-load", initHeaderBackdrop);
+  if (document.readyState !== "loading") initHeaderBackdrop();
+</script>
+
+<style lang="stylus">
+  .header-backdrop {
+    --header-nav-clearance: 56px;
+    --header-wave-height: clamp(68px, 13vh, 122px);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 180%;
+    z-index: -2;
+    overflow: hidden;
+    user-select: none;
+    -webkit-mask: linear-gradient(to top, transparent, #fff 50%);
+    mask: linear-gradient(to top, transparent, #fff 50%);
+
+    @media screen and (max-width: 959px) {
+      height: 120%;
+    }
+
+    @media screen and (max-width: 767px) {
+      height: 100%;
+    }
+
+    picture {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    > img,
+    picture img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+      object-position: center 28%;
+    }
+  }
+
+  .header-backdrop.is-slideshow {
+    height: 100%;
+    z-index: 0;
+    -webkit-mask: none;
+    mask: none;
+  }
+
+  .header-slide-stack,
+  .header-slide {
+    position: absolute;
+    inset: 0;
+  }
+
+  .header-slide {
+    opacity: 0;
+    transition: opacity 1.5s ease;
+
+    &.is-active {
+      opacity: 1;
+    }
+  }
+
+  .header-slide img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .header-slide-ambient {
+    z-index: 0;
+    inset: -2%;
+    width: 104%;
+    height: 104%;
+    object-fit: cover;
+    opacity: 0.5;
+    filter: blur(22px) saturate(1.05) brightness(0.72);
+    transform: scale(1.04);
+  }
+
+  .header-slide img.header-slide-image {
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    object-fit: cover;
+    object-position: center;
+    filter: saturate(1.04) contrast(1.02);
+    transform: scale(1.002);
+  }
+
+  .header-clarity {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    background: linear-gradient(
+      180deg,
+      rgba(13, 24, 35, 0.08) 0%,
+      rgba(255, 255, 255, 0.02) 44%,
+      rgba(235, 245, 250, 0.1) 100%
+    );
+  }
+
+  .header-meteors {
+    position: absolute;
+    inset: 0 0 10%;
+    z-index: 3;
+    overflow: hidden;
+    pointer-events: none;
+    mix-blend-mode: screen;
+  }
+
+  .header-meteor {
+    position: absolute;
+    width: 150px;
+    height: 1px;
+    opacity: 0;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(221, 244, 255, 0.42) 54%,
+      rgba(255, 255, 255, 0.96)
+    );
+    filter: drop-shadow(0 0 4px rgba(207, 238, 255, 0.9));
+    transform: rotate(-30deg);
+    animation: meteor-drift 12s linear infinite;
+
+    &::after {
+      content: "";
+      position: absolute;
+      right: -1px;
+      top: -1px;
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 0 7px rgba(220, 245, 255, 0.95);
+    }
+  }
+
+  .meteor-one {
+    top: 9%;
+    left: 77%;
+    animation-delay: 1.8s;
+  }
+
+  .meteor-two {
+    top: 22%;
+    left: 92%;
+    width: 105px;
+    animation-delay: 6.4s;
+    animation-duration: 15s;
+  }
+
+  .meteor-three {
+    top: 4%;
+    left: 60%;
+    width: 82px;
+    animation-delay: 10.5s;
+    animation-duration: 18s;
+  }
+
+  .header-waves {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    z-index: 5;
+    height: var(--header-wave-height);
+    pointer-events: none;
+    overflow: hidden;
+
+    svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    use {
+      fill: var(--color-background);
+      animation: header-wave 25s cubic-bezier(0.5, 0.5, 0.45, 0.5) infinite;
+      will-change: transform;
+    }
+
+    .wave-one {
+      opacity: 0.22;
+      animation-delay: -2s;
+      animation-duration: 7s;
+    }
+
+    .wave-two {
+      opacity: 0.42;
+      animation-delay: -3s;
+      animation-duration: 10s;
+    }
+
+    .wave-three {
+      opacity: 0.68;
+      animation-delay: -4s;
+      animation-duration: 13s;
+    }
+
+    .wave-four {
+      animation-delay: -5s;
+      animation-duration: 20s;
+    }
+  }
+
+  :global([data-theme='dark']) .header-slide-ambient {
+    filter: blur(26px) saturate(0.82) brightness(0.54);
+  }
+
+  :global([data-theme='dark']) .header-slide-image {
+    filter: brightness(0.76) saturate(0.88);
+  }
+
+  @keyframes header-wave {
+    0% {
+      transform: translateX(-90px);
+    }
+
+    100% {
+      transform: translateX(85px);
+    }
+  }
+
+  @keyframes meteor-drift {
+    0%,
+    7% {
+      opacity: 0;
+      transform: translate3d(0, 0, 0) rotate(-30deg);
+    }
+
+    9% {
+      opacity: 0.9;
+    }
+
+    24% {
+      opacity: 0;
+      transform: translate3d(-62vw, 36vh, 0) rotate(-30deg);
+    }
+
+    100% {
+      opacity: 0;
+      transform: translate3d(-62vw, 36vh, 0) rotate(-30deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .header-slide {
+      transition: none;
+    }
+
+    .header-meteors {
+      display: none;
+    }
+
+    .header-waves use {
+      animation: none;
+    }
+  }
+</style>
